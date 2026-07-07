@@ -1,0 +1,12 @@
+<svg width="282" height="780" viewBox="0 0 282 780" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="out">
+<rect id="w_bed" width="149" height="166" fill="#FF6135" fill-opacity="0.44"/>
+<rect id="laundry" x="203" y="171" width="79" height="105" fill="#FFEE35" fill-opacity="0.44"/>
+<rect id="bed_1" x="157" width="125" height="166" fill="#35FFF2" fill-opacity="0.44"/>
+<rect id="w_bath" y="171" width="104" height="157" fill="#CC35FF" fill-opacity="0.44"/>
+<rect id="s_bath" y="341" width="104" height="58" fill="#CC35FF" fill-opacity="0.44"/>
+<rect id="den" x="156" y="281" width="126" height="139" fill="#35FFF2" fill-opacity="0.44"/>
+<rect id="entry" x="225" y="429" width="54" height="351" fill="#35FFF2" fill-opacity="0.44"/>
+<path id="living_dining_kitchen" d="M194 278H149V426H219V773H203V776H0V412H95.0986V426H112V171H194V278Z" fill="#FF6135" fill-opacity="0.44"/>
+</g>
+</svg>
