@@ -15,8 +15,8 @@ def fc():
     # indir = ProjectPaths.svgs.eplus
     # outdir = ProjectPaths.geoms.eplus
 
-    indir = ProjectPaths.svgs.a
-    outdir = ProjectPaths.geoms.a
+    indir = ProjectPaths.svgs.c
+    outdir = ProjectPaths.geoms.c
     # TODO: to utils4plans..
     with open(indir / fn.config) as f:
         data = yaml.safe_load(f)

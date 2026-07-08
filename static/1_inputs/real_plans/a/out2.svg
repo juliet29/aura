@@ -2,7 +2,7 @@
 <rect width="282" height="780" fill="#F5F5F5"/>
 <g id="amb_b1_ortho">
 <rect width="1280" height="1079" transform="translate(-898 -39)" fill="white"/>
-<g id="Group 3">
+<g id="Group 8">
 <rect id="image 6" x="-14" y="-19" width="325" height="1012" fill="url(#pattern0_0_1)"/>
 <g id="amb_b1">
 <rect id="w_bed" width="149" height="166" fill="#FF6135" fill-opacity="0.44"/>
@@ -12,9 +12,7 @@
 <rect id="s_bath" y="341" width="104" height="58" fill="#CC35FF" fill-opacity="0.44"/>
 <rect id="den" x="156" y="281" width="126" height="139" fill="#35FFF2" fill-opacity="0.44"/>
 <rect id="entry" x="225" y="429" width="54" height="351" fill="#35FFF2" fill-opacity="0.44"/>
-<rect id="transit" x="112" y="281" width="37" height="145" fill="#FF3538" fill-opacity="0.44"/>
-<path id="Union" d="M95.0986 426H219V773H203V776H0V412H95.0986V426Z" fill="#476EEF" fill-opacity="0.6"/>
-<rect id="transit2" x="112" y="171" width="82" height="107" fill="#35FFF2" fill-opacity="0.44"/>
+<path id="Union" d="M194 278H149V426H219V773H203V776H0V412H95.0986V426H112V171H194V278Z" fill="#FF6135" fill-opacity="0.44"/>
 </g>
 </g>
 </g>

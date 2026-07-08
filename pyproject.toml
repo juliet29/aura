@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 authors = [
-    { name = "Juliet Nwagwu Ume-Ezeoke", email = "jnwagwu@stanford.edu" }
+  { name = "Juliet Nwagwu Ume-Ezeoke", email = "jnwagwu@stanford.edu" },
 ]
 requires-python = ">=3.13"
 dependencies = []
@@ -12,3 +12,12 @@ dependencies = []
 [build-system]
 requires = ["uv_build>=0.8.3,<0.9.0"]
 build-backend = "uv_build"
+
+[tool.uv.sources]
+utils4plans = { path = "../utils4plans", editable = true }
+sv2 = { path = "../sv2", editable = true }
+
+
+[project.scripts]
+au = "aura2.cli.make.main:main"
+aus = "aura2.cli.studies.study:main"
