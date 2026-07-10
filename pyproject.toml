@@ -7,7 +7,7 @@ authors = [
   { name = "Juliet Nwagwu Ume-Ezeoke", email = "jnwagwu@stanford.edu" },
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = ["plan2eplus", "sv2", "utils4plans"]
 
 [build-system]
 requires = ["uv_build>=0.8.3,<0.9.0"]
@@ -16,6 +16,7 @@ build-backend = "uv_build"
 [tool.uv.sources]
 utils4plans = { path = "../utils4plans", editable = true }
 sv2 = { path = "../sv2", editable = true }
+plan2eplus = { path = "../plan2eplus", editable = true }
 
 
 [project.scripts]
