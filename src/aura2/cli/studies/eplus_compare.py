@@ -1,7 +1,10 @@
 import yaml
 from cyclopts import App
+from plan2eplus.ezcase.ez import EZ
+from plan2eplus.visuals.simple_plots import make_base_plot
 from sv2.pfix.config import CaseConfig
 from sv2.pfix.main import transform_svg
+from utils4plans.io.extras.figures import save_mpl_fig
 
 from aura2.geom.adjacencies import read_subsurface_inputs
 from aura2.geom.zones import get_eplus_rooms_from_path
@@ -39,4 +42,19 @@ def fc():
 def fd():
     path = ProjectPaths.geoms.eplus / "eplus.adj.yaml"
     return read_subsurface_inputs(path)
+
     # read plans
+
+
+@epc.command
+def fe():
+    rooms = fc()
+    subsurface_inputs = fd()
+    output_path = ProjectPaths.geoms.eplus
+    case = EZ(output_path=output_path)
+    case.add_zones(rooms)
+    case.add_subsurfaces(subsurface_inputs)
+
+    bp = make_base_plot(case).finalize()
+    save_mpl_fig(bp.fig, output_path / "case.png")
+    return case

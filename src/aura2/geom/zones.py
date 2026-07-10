@@ -12,7 +12,9 @@ def get_eplus_rooms_from_path(path: Path, height: float = DEFAULT_HEIGHT):
     def to_room(id: int, dom: FancyOrthoDomain) -> Room:
         # A FancyOrthoDomain isn't a plan2eplus Domain, so Room.coords takes the
         # `else` branch and reads dom.tuple_list directly.
-        return Room(id=id, name=dom.name, domain=dom, height=height)
+        return Room(
+            id=id, name=dom.name, domain=dom, height=height, reverse_coords=True
+        )
 
     layout = read_layout_from_path(path)
     rooms = [to_room(i, dom) for i, dom in enumerate(layout.domains)]
