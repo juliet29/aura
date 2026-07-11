@@ -7,7 +7,7 @@ authors = [
   { name = "Juliet Nwagwu Ume-Ezeoke", email = "jnwagwu@stanford.edu" },
 ]
 requires-python = ">=3.13"
-dependencies = ["plan2eplus", "sv2", "utils4plans[figures]"]
+dependencies = ["plan2eplus", "sv2", "utils4plans[figures]", "plyze", "vl-convert-python>=1.0", "seaborn>=0.13"]
 
 [build-system]
 requires = ["uv_build>=0.8.3,<0.9.0"]
@@ -17,6 +17,7 @@ build-backend = "uv_build"
 utils4plans = { path = "../utils4plans", editable = true }
 sv2 = { path = "../sv2", editable = true }
 plan2eplus = { path = "../plan2eplus", editable = true }
+plyze = { path = "../plyze", editable = true }
 
 
 [project.scripts]

@@ -78,15 +78,35 @@ def to_adjacency(room: str, entry: RawEntry, rooms: set[str]) -> Adjacency:
     return Adjacency(Edge(room, target), edge_type)
 
 
-def parse_adjacencies(adj: dict[str, list[RawEntry]]) -> list[Adjacency]:
-    rooms = set(adj.keys())
+def parse_adjacencies(
+    adj: dict[str, list[RawEntry]], strict: bool = True
+) -> list[Adjacency]:
+    # a room can appear only as a target (polyfix writes each edge once), so the
+    # room set is the keys plus every non-direction target
+    targets = {split_entry(e)[0] for entries in adj.values() for e in entries}
+    rooms = set(adj.keys()) | {t for t in targets if t not in WallNormalNamesList}
     adjacencies = [
         to_adjacency(room, entry, rooms)
         for room, entries in adj.items()
         for entry in entries
     ]
-    check_single_sided(adjacencies)
-    return adjacencies
+    if strict:  # hand-authored input: a double-sided edge is an authoring error
+        check_single_sided(adjacencies)
+        return adjacencies
+    return dedupe_room_edges(adjacencies)  # auto adjacency lists edges from both sides
+
+
+def dedupe_room_edges(adjacencies: list[Adjacency]) -> list[Adjacency]:
+    seen: set[frozenset[str]] = set()
+    out = []
+    for a in adjacencies:
+        if a.group_type == "Zone_Zone":
+            key = frozenset(a.edge.as_tuple)
+            if key in seen:
+                continue
+            seen.add(key)
+        out.append(a)
+    return out
 
 
 def check_single_sided(adjacencies: list[Adjacency]) -> None:
@@ -125,10 +145,10 @@ def to_subsurface_inputs(
     return SubsurfaceInputs(filtered_edge_groups, details)
 
 
-def read_adjacencies(path: Path) -> list[Adjacency]:
-    return parse_adjacencies(read_yaml(path))
+def read_adjacencies(path: Path, strict: bool = True) -> list[Adjacency]:
+    return parse_adjacencies(read_yaml(path), strict=strict)
 
 
-def read_subsurface_inputs(path: Path) -> SubsurfaceInputs:
-    adj = read_adjacencies(path)
+def read_subsurface_inputs(path: Path, strict: bool = True) -> SubsurfaceInputs:
+    adj = read_adjacencies(path, strict=strict)
     return to_subsurface_inputs(adj)
