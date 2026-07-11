@@ -48,7 +48,7 @@ class ProjectDir(Enum):
 
     @property
     def raw(self):
-        return self.temp_dir / "init"
+        return self.temp_dir / "raw"
 
     @property
     def geom(self):
@@ -63,11 +63,17 @@ class ProjectDir(Enum):
 class FileNames:
     config = "config.yaml"
     svg = "out.svg"
-    adjacencies = "eplus.adj.yaml"
-    corrected_geom = "ymove/out.json"  # will change after final polyfix check
+
+    gen_adjacencies = "out.adj.yaml"
+    copied_adjacencies = "copy.adj.yaml"
+    adjacencies = "adj.yaml"
+    corrected_geom = "reconcile/out.json"  # polyfix reconcile stage closes ymove gaps
 
     # figures
-    base_case = "base.png"
+    base_plot = "base.png"
+
+    # modeling
+    idf = "out.idf"
 
 
 class ProjectPaths:  # TODO: validation studies still depend on these, but needs to integrape with new ProjectDir schema

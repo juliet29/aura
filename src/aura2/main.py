@@ -16,12 +16,14 @@ from aura2.paths import ProjectDir
 
 def make_case_plot(case: EZ, path: Path):
     bp = make_base_plot(case).finalize()
-    save_mpl_fig(bp.fig, path / fn.base_case)
+    bp.axes.set_aspect("equal")
+
+    save_mpl_fig(bp.fig, path / fn.base_plot)
 
 
 def get_case_inputs(path: Path):
     rooms = get_eplus_rooms_from_path(path / fn.corrected_geom)
-    subsurface_inputs = read_subsurface_inputs(path / fn.adjacencies)
+    subsurface_inputs = read_subsurface_inputs(path.parent / fn.adjacencies)
     return rooms, subsurface_inputs
 
 
@@ -35,15 +37,19 @@ def transform_case(pd: ProjectDir):
 
     config = CaseConfig(pd.raw / fn.svg, pixel, meter, pd.geom)
     transform_svg(config)
+
+    shutil.copy(pd.geom / fn.gen_adjacencies, pd.temp_dir / fn.copied_adjacencies)
     return config
 
 
-def make_basic_case(pd: ProjectDir):
+def make_basic_case(pd: ProjectDir, run: bool = False):
     rooms, subsurface_inputs = get_case_inputs(pd.geom)
 
     case = EZ(output_path=pd.model)
     case.add_zones(rooms)
     case.add_subsurfaces(subsurface_inputs)
-    case.save_and_run(save=True, run=False)
+    case.add_constructions()
+    case.add_airflow_network()
+    case.save_and_run(save=True, run=run)
 
     return case
