@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import NamedTuple
 
 import pyprojroot
 
@@ -28,11 +29,50 @@ class GeomPaths:
     c = base / "real_plans/c"
 
 
+# TODO: this probably needs to be resturcuted to not be so repetititive..
+
+
+class CaseFolder(NamedTuple):
+    name: str
+    inputs: Path = StaticPaths.inputs
+    temp: Path = StaticPaths.temp
+
+    @property
+    def _init(self):
+        return self.inputs / self.name
+
+    @property
+    def _intermed(self):
+        return self.temp / self.name
+
+    @property
+    def init(self):
+        return self._intermed / "init"
+
+    @property
+    def geom(self):
+        return self._intermed / "geom"
+
+    @property
+    def model(self):
+        return self._intermed / "model"
+
+
+class ProjectDirectories:
+    eplus_compare = CaseFolder("eplus_compare")
+    a = CaseFolder("real_plans/a")
+    b = CaseFolder("real_plans/b")
+    c = CaseFolder("real_plans/c")
+
+
 class ProjectPaths:
     svgs = SVGPaths
     geoms = GeomPaths
 
 
+# ok for FileNames to coexist here because this is a root repo
 class FileNames:
     config = "config.yaml"
     svg = "out.svg"
+    adjacencies = "eplus.adj.yaml"
+    geom = "ymove/out.json"  # will change after final polyfix check
