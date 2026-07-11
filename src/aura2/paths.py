@@ -1,5 +1,5 @@
+from enum import Enum
 from pathlib import Path
-from typing import NamedTuple
 
 import pyprojroot
 
@@ -32,42 +32,31 @@ class GeomPaths:
 # TODO: this probably needs to be resturcuted to not be so repetititive..
 
 
-class CaseFolder(NamedTuple):
-    name: str
-    inputs: Path = StaticPaths.inputs
-    temp: Path = StaticPaths.temp
+class ProjectDir(Enum):
+    eplus_compare = "eplus_compare"
+    a = "real_plans/a"
+    b = "real_plans/b"
+    c = "real_plans/c"
 
     @property
-    def _init(self):
-        return self.inputs / self.name
+    def inputs_dir(self):
+        return StaticPaths.inputs / self.value
 
     @property
-    def _intermed(self):
-        return self.temp / self.name
+    def temp_dir(self):
+        return StaticPaths.temp / self.value
 
     @property
-    def init(self):
-        return self._intermed / "init"
+    def raw(self):
+        return self.temp_dir / "init"
 
     @property
     def geom(self):
-        return self._intermed / "geom"
+        return self.temp_dir / "geom"
 
     @property
     def model(self):
-        return self._intermed / "model"
-
-
-class ProjectDirectories:
-    eplus_compare = CaseFolder("eplus_compare")
-    a = CaseFolder("real_plans/a")
-    b = CaseFolder("real_plans/b")
-    c = CaseFolder("real_plans/c")
-
-
-class ProjectPaths:
-    svgs = SVGPaths
-    geoms = GeomPaths
+        return self.temp_dir / "model"
 
 
 # ok for FileNames to coexist here because this is a root repo
@@ -75,4 +64,12 @@ class FileNames:
     config = "config.yaml"
     svg = "out.svg"
     adjacencies = "eplus.adj.yaml"
-    geom = "ymove/out.json"  # will change after final polyfix check
+    corrected_geom = "ymove/out.json"  # will change after final polyfix check
+
+    # figures
+    base_case = "base.png"
+
+
+class ProjectPaths:  # TODO: validation studies still depend on these, but needs to integrape with new ProjectDir schema
+    svgs = SVGPaths
+    geoms = GeomPaths
