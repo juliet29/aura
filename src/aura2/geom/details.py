@@ -38,9 +38,8 @@ class DoorDetail(BaseModel):
         )
 
 
-# validation experiment: ~5 m2 x2 windows = 10 m2 total glazing to match the
-# reference's solar aperture (orig 0.71 x 1.52)
-WINDOW = WindowDetail(id=1, width=2.5, height=2.0)
+# p1gen reference window (case_amb_b1): Andersen casement, 0.71 x 1.52 = 1.08 m2
+WINDOW = WindowDetail(id=1, width=0.71, height=1.52)
 DOOR = DoorDetail(id=0, width=0.81, height=2.03, thickness=0.30)
 
 DETAILS: dict[DetailType, Detail] = {

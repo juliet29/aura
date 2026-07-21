@@ -1,0 +1,10 @@
+campaign_name: real_plans
+# Palo Alto 2024 epw (matches p1gen); run rule passes this to EnergyPlus
+epw: static/1_inputs/weather/CA_PALO-ALTO-AP_724937_24.EPW
+# summer cooling season (matches p1gen config.py ANALYSIS_PERIOD); run rule passes this to EnergyPlus
+analysis_period:
+  name: summer_cooling_season
+  st_month: 6
+  end_month: 10
+  st_day: 1
+  end_day: 31

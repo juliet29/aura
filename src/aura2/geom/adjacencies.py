@@ -57,11 +57,14 @@ class Adjacency:
         return DETAIL_BY_EDGE_TYPE[self.edge_type]
 
 
-def split_entry(entry: RawEntry) -> tuple[str, EdgeTypes]:
-    if isinstance(entry, (list, tuple)):
-        target, code = entry
-        return target, EdgeTypes(code)
-    return entry, EdgeTypes.DEFAULT
+def split_entry(entry: RawEntry) -> tuple[str, EdgeTypes, int]:
+    # second element is either a leakage code ('c'/'a') or a wall index (int)
+    if not isinstance(entry, (list, tuple)):
+        return entry, EdgeTypes.DEFAULT, 0
+    target, modifier = entry
+    if isinstance(modifier, int):
+        return target, EdgeTypes.DEFAULT, modifier
+    return target, EdgeTypes(modifier), 0
 
 
 def validate_target(room: str, target: str, rooms: set[str]) -> None:
@@ -73,9 +76,9 @@ def validate_target(room: str, target: str, rooms: set[str]) -> None:
 
 
 def to_adjacency(room: str, entry: RawEntry, rooms: set[str]) -> Adjacency:
-    target, edge_type = split_entry(entry)
+    target, edge_type, index = split_entry(entry)
     validate_target(room, target, rooms)
-    return Adjacency(Edge(room, target), edge_type)
+    return Adjacency(Edge(room, target, index), edge_type)
 
 
 def parse_adjacencies(
@@ -97,11 +100,11 @@ def parse_adjacencies(
 
 
 def dedupe_room_edges(adjacencies: list[Adjacency]) -> list[Adjacency]:
-    seen: set[frozenset[str]] = set()
+    seen: set[tuple[frozenset[str], int]] = set()
     out = []
     for a in adjacencies:
         if a.group_type == "Zone_Zone":
-            key = frozenset(a.edge.as_tuple)
+            key = (frozenset(a.edge.as_tuple), a.edge.index)
             if key in seen:
                 continue
             seen.add(key)
@@ -110,16 +113,17 @@ def dedupe_room_edges(adjacencies: list[Adjacency]) -> list[Adjacency]:
 
 
 def check_single_sided(adjacencies: list[Adjacency]) -> None:
-    seen: dict[Edge, EdgeTypes] = {}
+    seen: dict[tuple[frozenset[str], int], EdgeTypes] = {}
     for a in adjacencies:
         if a.group_type != "Zone_Zone":
             continue  # a room may face the same exterior twice (e.g. two S windows)
-        if a.edge in seen:
+        key = (frozenset(a.edge.as_tuple), a.edge.index)
+        if key in seen:
             raise ValueError(
-                f"room-room edge {a.edge.as_tuple} listed from both sides "
-                f"(edge_type {seen[a.edge]} vs {a.edge_type}); list it once"
+                f"room-room edge {a.edge.as_tuple} (wall #{a.edge.index}) listed "
+                f"from both sides (edge_type {seen[key]} vs {a.edge_type}); list it once"
             )
-        seen[a.edge] = a.edge_type
+        seen[key] = a.edge_type
 
 
 # ── assembling plan2eplus inputs ─────────────────────────────────────────────
@@ -149,6 +153,8 @@ def read_adjacencies(path: Path, strict: bool = True) -> list[Adjacency]:
     return parse_adjacencies(read_yaml(path), strict=strict)
 
 
-def read_subsurface_inputs(path: Path, strict: bool = True) -> SubsurfaceInputs:
+def read_subsurface_inputs(
+    path: Path, strict: bool = True, details: dict[DetailType, Detail] = DETAILS
+) -> SubsurfaceInputs:
     adj = read_adjacencies(path, strict=strict)
-    return to_subsurface_inputs(adj)
+    return to_subsurface_inputs(adj, details)

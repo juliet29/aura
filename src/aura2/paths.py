@@ -1,16 +1,19 @@
+import os
 from enum import Enum
 from pathlib import Path
 
 import pyprojroot
+from dotenv import load_dotenv
 
 BASE_PATH = pyprojroot.find_root(pyprojroot.has_dir(".git"))
-TEMP_PATH = "/scratch/users/jnwagwu/aura"
+load_dotenv(Path(BASE_PATH) / ".env")
+TEMP_PATH = os.getenv("TEMP_PATH", "static/4_temp")
 
 
 class StaticPaths:
     inputs = Path(BASE_PATH) / "static/1_inputs"
-    temp = Path(TEMP_PATH) / "4_temp"
-    figures = Path(TEMP_PATH) / "5_figures"
+    temp = Path(BASE_PATH) / TEMP_PATH / "4_temp"
+    figures = Path(BASE_PATH) / TEMP_PATH / "5_figures"
 
 
 class SVGPaths:

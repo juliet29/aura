@@ -6,7 +6,7 @@ from aura2.paths import FileNames, ProjectDir
 
 rp = App("rp")
 
-CURR_CASE = ProjectDir.c
+CURR_CASE = ProjectDir.a
 
 
 @rp.command()

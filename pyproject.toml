@@ -7,7 +7,18 @@ authors = [
   { name = "Juliet Nwagwu Ume-Ezeoke", email = "jnwagwu@stanford.edu" },
 ]
 requires-python = ">=3.13"
-dependencies = ["plan2eplus", "sv2", "utils4plans[figures]", "plyze", "vl-convert-python>=1.0", "seaborn>=0.13"]
+dependencies = [
+    "plan2eplus",
+    "sv2",
+    "utils4plans[figures]",
+    "plyze",
+    "vl-convert-python>=1.0",
+    "seaborn>=0.13",
+    "snakemake>=9.16.3",
+    "tqdm>=4.68",
+    "astropy>=8.0.1",
+    "python-dotenv>=1.2.2",
+]
 
 [build-system]
 requires = ["uv_build>=0.8.3,<0.9.0"]
@@ -23,3 +34,4 @@ plyze = { path = "../plyze", editable = true }
 [project.scripts]
 au = "aura2.cli.make.main:main"
 aus = "aura2.cli.studies.study:main"
+auv = "aura2.cli.validate.val:main"

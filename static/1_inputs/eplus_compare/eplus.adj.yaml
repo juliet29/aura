@@ -1,0 +1,15 @@
+West:
+  - [East, c]
+  - North
+  - [WEST, c]
+  - [SOUTH, c]
+  - SOUTH
+East:
+  - [North, c]
+  - [SOUTH, c]
+  - [EAST, c]
+North:
+  - [EAST, c]
+  - [WEST, c]
+  - [NORTH, c]
+  - NORTH

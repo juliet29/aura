@@ -8,3 +8,10 @@ wheels/
 
 # Virtual environments
 .venv
+.snakemake
+
+# Local environment
+.env
+info.md
+run_campaign.sbatch
+monitor_campaign.sh

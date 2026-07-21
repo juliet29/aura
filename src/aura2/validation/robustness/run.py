@@ -2,50 +2,18 @@ import hashlib
 from dataclasses import dataclass
 
 import pandas as pd
-import yaml
-from cyclopts import App
 from loguru import logger
 from polyfix.main.execute import execute_polyfix
-from polyfix.main.process import read_layout_from_path, write_layout
-from polyfix.main.workflow_paths import SingleWorkflowPaths
-from sv2.pfix.main import calculate_scaling_factor, write_initial_model
+from polyfix.main.process import read_layout_from_path
+from utils4plans.io.base import make_dir
 
-from aura2.cli.studies.robustness import metrics
-from aura2.cli.studies.robustness.perturb import perturb_layout
-from aura2.paths import FileNames as fn
-from aura2.paths import GeomPaths, StaticPaths
-
-rob = App("rob")
-
-PLANS_DIR = StaticPaths.inputs / "real_plans"
-ROBUST_DIR = GeomPaths.base / "robustness"
-RESULTS_DIR = ROBUST_DIR / "results"
-FRACTION = 0.5
-SHRINKS = [0.10, 0.20, 0.30]
-
-
-def discover_plans() -> list[str]:
-    return sorted(
-        p.name
-        for p in PLANS_DIR.iterdir()
-        if (p / fn.config).exists() and (p / fn.svg).exists()
-    )
-
-
-def read_scaling(plan: str) -> float:
-    with open(PLANS_DIR / plan / fn.config) as f:
-        data = yaml.safe_load(f)
-    return calculate_scaling_factor(data["pixel"], data["meter"])
-
-
-def prepare_workdir(plan: str, shrink: float, seed: int, tag: str) -> SingleWorkflowPaths:
-    workdir = ROBUST_DIR / plan / tag
-    write_initial_model(PLANS_DIR / plan / fn.svg, workdir, read_scaling(plan))
-    paths = SingleWorkflowPaths(workdir)
-    if shrink > 0:
-        layout = perturb_layout(read_layout_from_path(paths.init), FRACTION, shrink, seed)
-        write_layout(layout, paths.init)
-    return paths
+from aura2.validation.robustness import metrics
+from aura2.validation.robustness.paths import (
+    RESULTS_DIR,
+    SHRINKS,
+    discover_plans,
+    prepare_workdir,
+)
 
 
 def geometry_hash(layout) -> str:
@@ -60,9 +28,6 @@ def geometry_hash(layout) -> str:
 class RunResult:
     valid: bool
     reason: str
-    ged: float | None
-    edges_before: int | None
-    edges_after: int | None
     geometry_rows: list[dict]
 
 
@@ -89,24 +54,17 @@ def run_condition(plan: str, shrink: float, seed: int) -> RunResult:
         execute_polyfix(paths.base, save_adj=True)
     except Exception as e:
         logger.warning(f"{plan} {tag} failed: {type(e).__name__}")
-        return RunResult(False, f"polyfix error: {type(e).__name__}", None, None, None, [])
+        return RunResult(False, f"polyfix error: {type(e).__name__}", [])
 
-    before = read_layout_from_path(paths.init)          # geometry: raw perturbed init
-    simplified = read_layout_from_path(paths.simplify)  # adjacency baseline (orthogonalized)
+    before = read_layout_from_path(paths.init)
     after = read_layout_from_path(paths.ymove)
 
     valid, reason = metrics.is_valid(after)
-    g_before = metrics.adjacency_graph(simplified)
-    g_after = metrics.adjacency_graph(after)
-    ged = metrics.graph_edit_distance(g_before, g_after)
     rows = geometry_rows(plan, shrink, seed, before, after)
-    return RunResult(valid, reason, ged,
-                     g_before.number_of_edges(), g_after.number_of_edges(), rows)
+    return RunResult(valid, reason, rows)
 
 
-@rob.command
-def run(seeds: int = 10):
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+def run_all(seeds: int = 10):
     conditions = [(0.0, 0)] + [(s, seed) for s in SHRINKS for seed in range(seeds)]
     geom, runs = [], []
     for plan in discover_plans():
@@ -115,16 +73,14 @@ def run(seeds: int = 10):
             geom.extend(res.geometry_rows)
             runs.append({
                 "plan": plan, "shrink": shrink, "seed": seed,
-                "valid": res.valid, "reason": res.reason, "ged": res.ged,
-                "edges_before": res.edges_before, "edges_after": res.edges_after,
+                "valid": res.valid, "reason": res.reason,
             })
+    make_dir(RESULTS_DIR / "geometry.csv")
     pd.DataFrame(geom).to_csv(RESULTS_DIR / "geometry.csv", index=False)
     pd.DataFrame(runs).to_csv(RESULTS_DIR / "runs.csv", index=False)
 
 
-@rob.command
-def determinism(repeats: int = 3):
-    RESULTS_DIR.mkdir(parents=True, exist_ok=True)
+def determinism_check(repeats: int = 3):
     rows = []
     for plan in discover_plans():
         hashes = []
@@ -136,4 +92,5 @@ def determinism(repeats: int = 3):
             "plan": plan, "repeats": repeats,
             "identical": len(set(hashes)) == 1, "hash": hashes[0],
         })
+    make_dir(RESULTS_DIR / "determinism.csv")
     pd.DataFrame(rows).to_csv(RESULTS_DIR / "determinism.csv", index=False)
