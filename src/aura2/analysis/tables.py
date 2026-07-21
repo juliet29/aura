@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from pathlib import Path
 
 import pandas as pd
@@ -43,7 +41,11 @@ def delta_table(qoi_name: str, value: str = "delta") -> pd.DataFrame:
     piv["mean"] = piv.mean(axis=1)
     piv = piv.reset_index()
     piv["category"] = piv["category"].map(NICE_VAR)
-    return piv.rename(columns={"category": "modification"}).set_index(["modification", "option"]).round(3)
+    return (
+        piv.rename(columns={"category": "modification"})
+        .set_index(["modification", "option"])
+        .round(3)
+    )
 
 
 FACTOR_ORDER = ["PLAN (layout)", "Window Dimension", "Door Ventilation", "Construction"]
@@ -51,12 +53,6 @@ METRIC_LABEL = {"temp": "ΔT [°C]", "flow": "ΔV̇ [m³/s]"}
 
 
 def factor_spread_table(idx=None) -> pd.DataFrame:
-    # per-PLAN factor spread: within-plan range of each intervention across its options,
-    # kept SEPARATELY per plan (NOT averaged — the mean masks the plan-sensitive
-    # interactions, e.g. door-vent temp spread 0.88 in A vs 0.06 in B). The PLAN (layout)
-    # row is the cross-layout baseline spread — a single value with no per-plan
-    # decomposition, so it lands in the first plan column (spanning min<->max case).
-    # idx restricts to a climatic section (subset of timesteps).
     frames = {}
     for key, qoi, _ in QOIS:
         df = create_data_set(qoi, idx).to_pandas()
@@ -88,41 +84,6 @@ def make_tables(out_dir: Path, split_climate: bool = False) -> dict[str, pd.Data
         masks = section_masks()
         for name, m in masks.items():
             tables[f"factor_spread_{name}"] = factor_spread_table(np.where(m)[0])
-        write_climate_note(out_dir, masks)
     for name, tbl in tables.items():
         tbl.to_csv(out_dir / f"{name}.csv")
     return tables
-
-
-def write_climate_note(out_dir: Path, masks: dict) -> None:
-    total = len(next(iter(masks.values())))
-    n_north, n_west = int(masks["north"].sum()), int(masks["west"].sum())
-    rows = [
-        ("North wind (315–45°)", n_north),
-        ("West wind (225–315°)", n_west),
-        ("East + South (excluded)", total - n_north - n_west),
-        ("Day (06–18h)", int(masks["day"].sum())),
-        ("Night (18–06h)", int(masks["night"].sum())),
-    ]
-    lines = [
-        "# Climate-conditioned sensitivity — summary",
-        "",
-        f"Real Palo Alto 2024 weather, summer cooling season (Jun 1 – Oct 31): "
-        f"{total:,} timesteps at 15-min resolution.",
-        "",
-        "## Observation counts per section",
-        "",
-        "| Section | Timesteps | Share |",
-        "|:--|--:|--:|",
-        *[f"| {name} | {n:,} | {100 * n / total:.1f}% |" for name, n in rows],
-        "",
-        "North and west cover ~97% of the season; east/south are negligible, so only "
-        "N vs W is a well-sampled directional contrast. Day/night split the season in half.",
-        "",
-        "## Files",
-        "- `factor_spread.csv` — whole-season PER-PLAN factor spread (ΔT, ΔV̇; columns A/B/C). "
-        "PLAN (layout) row = cross-layout baseline spread (single value, in the first column).",
-        "- `factor_spread_{north,west,day,night}.csv` — same, conditioned on each section.",
-        "- `sensitivity_{temp,flow}{,_pct}.csv`, `baselines.csv` — per-option deltas and baselines.",
-    ]
-    (out_dir / "SUMMARY.md").write_text("\n".join(lines) + "\n")
