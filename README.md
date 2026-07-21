@@ -1,5 +1,7 @@
 # aura
 
+[![DOI](https://zenodo.org/badge/1291731033.svg)](https://doi.org/10.5281/zenodo.21466574)
+
 This repository accompanies the paper "AURA: Automated Universal floor plan Replication for Airflow and thermal analysis". It transforms SVGs drawn on images of floorplans into EnergyPlus models, runs a sensitivity analysis, and validates the approach. [`svg2plan`](https://github.com/juliet29/sv2) transforms SVGs into vectorized data, while [`plan2eplus`](https://github.com/juliet29/plan2eplus) transforms vectorized data into energy models.
 
 ## Installation
